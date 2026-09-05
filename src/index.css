@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-parchment-100 text-wood-800 font-sans antialiased;
+}
+.dark body {
+  @apply bg-wood-950 text-parchment-100;
+}
+
+::selection {
+  @apply bg-amber-300/60 text-wood-900;
+}
+
+/* Custom scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(143, 93, 56, 0.4) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(143, 93, 56, 0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* ---- abcjs sheet music ---- */
+.abc-sheet svg {
+  width: 100%;
+  height: auto;
+}
+.abc-sheet .abcjs-note,
+.abc-sheet .abcjs-rest,
+.abc-sheet .abcjs-staff,
+.abc-sheet path,
+.abc-sheet text {
+  fill: #3b2519;
+}
+.dark .abc-sheet .abcjs-note,
+.dark .abc-sheet .abcjs-rest,
+.dark .abc-sheet .abcjs-staff,
+.dark .abc-sheet path,
+.dark .abc-sheet text {
+  fill: #f2e8d3;
+}
+.abc-sheet .abcjs-note_selected path {
+  fill: #d97706 !important;
+}
+.abc-sheet .abcjs-cursor {
+  stroke: #d97706;
+  stroke-width: 2;
+}
+
+/* ---- abcjs audio controls ---- */
+.abcjs-inline-audio {
+  @apply rounded-xl border border-wood-200 bg-parchment-50 text-wood-700;
+  height: 44px;
+}
+.dark .abcjs-inline-audio {
+  @apply border-wood-700 bg-wood-800 text-parchment-100;
+}
+.abcjs-inline-audio .abcjs-btn {
+  @apply bg-transparent text-wood-600;
+  border: none;
+}
+.dark .abcjs-inline-audio .abcjs-btn {
+  @apply text-parchment-200;
+}
+.abcjs-inline-audio .abcjs-btn:hover {
+  @apply bg-amber-100 text-wood-800;
+}
+.dark .abcjs-inline-audio .abcjs-btn:hover {
+  @apply bg-wood-700 text-white;
+}
+.abcjs-inline-audio .abcjs-midi-progress-background {
+  @apply bg-wood-200;
+  border: none;
+}
+.dark .abcjs-inline-audio .abcjs-midi-progress-background {
+  @apply bg-wood-700;
+}
+.abcjs-inline-audio .abcjs-midi-progress-indicator {
+  @apply bg-amber-500;
+}
+.abcjs-midi-tempo {
+  @apply bg-transparent text-wood-700;
+}
+.dark .abcjs-midi-tempo {
+  @apply text-parchment-100;
+}

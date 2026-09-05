@@ -1,0 +1,2 @@
+[functions.fetch-composer]
+verify_jwt = true

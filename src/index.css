@@ -71,27 +71,28 @@ body {
 
 /* ---- abcjs audio controls ---- */
 .abcjs-inline-audio {
-  @apply rounded-xl border border-wood-200 bg-parchment-50 text-wood-700;
+  @apply rounded-xl border border-wood-200 bg-parchment-50 text-wood-800;
   height: 44px;
 }
 .dark .abcjs-inline-audio {
   @apply border-wood-700 bg-wood-800 text-parchment-100;
 }
 .abcjs-inline-audio .abcjs-btn {
-  @apply bg-transparent text-wood-600;
+  @apply bg-transparent text-wood-800;
   border: none;
+  opacity: 1;
 }
 .dark .abcjs-inline-audio .abcjs-btn {
   @apply text-parchment-200;
 }
 .abcjs-inline-audio .abcjs-btn:hover {
-  @apply bg-amber-100 text-wood-800;
+  @apply bg-amber-100 text-wood-900;
 }
 .dark .abcjs-inline-audio .abcjs-btn:hover {
   @apply bg-wood-700 text-white;
 }
 .abcjs-inline-audio .abcjs-midi-progress-background {
-  @apply bg-wood-200;
+  @apply bg-wood-300;
   border: none;
 }
 .dark .abcjs-inline-audio .abcjs-midi-progress-background {
@@ -101,7 +102,8 @@ body {
   @apply bg-amber-500;
 }
 .abcjs-midi-tempo {
-  @apply bg-transparent text-wood-700;
+  @apply bg-transparent text-wood-800;
+  font-weight: 600;
 }
 .dark .abcjs-midi-tempo {
   @apply text-parchment-100;

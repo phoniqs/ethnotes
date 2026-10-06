@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import abcjs from 'abcjs';
 import 'abcjs/abcjs-audio.css';
-import { ChevronDown, ChevronUp, Volume2, VolumeX } from 'lucide-react';
+import { ChevronDown, ChevronUp, Repeat, Volume2, VolumeX } from 'lucide-react';
 
 interface AbcSheetProps {
   abc: string;
@@ -30,6 +30,17 @@ class CursorControl {
   }
 }
 
+function stripRepeats(abc: string): string {
+  return abc
+    .replace(/\|:/g, '|')
+    .replace(/:\|/g, '|')
+    .replace(/\|\|/g, '|')
+    .replace(/\[1/g, '')
+    .replace(/\[2/g, '')
+    .replace(/\|1/g, '|')
+    .replace(/\|2/g, '|');
+}
+
 export default function AbcSheet({ abc, showAudio = false, responsive = true, scale, className = '', transpose, onTransposeChange }: AbcSheetProps) {
   const rawId = useId().replace(/:/g, '');
   const paperId = `abc-paper-${rawId}`;
@@ -41,6 +52,7 @@ export default function AbcSheet({ abc, showAudio = false, responsive = true, sc
   const [audioSupported, setAudioSupported] = useState(true);
   const [renderError, setRenderError] = useState(false);
   const [localTranspose, setLocalTranspose] = useState(0);
+  const [ignoreRepeats, setIgnoreRepeats] = useState(false);
   const shift = transpose ?? localTranspose;
 
   useEffect(() => {
@@ -84,6 +96,15 @@ export default function AbcSheet({ abc, showAudio = false, responsive = true, sc
     audioDiv.id = audioId;
     audioEl.appendChild(audioDiv);
 
+    const playbackAbc = ignoreRepeats ? stripRepeats(abc) : abc;
+
+    let synthVisualObjs: abcjs.TuneObject[];
+    try {
+      synthVisualObjs = abcjs.renderAbc(document.createElement('div'), playbackAbc, {});
+    } catch {
+      synthVisualObjs = visualObjs;
+    }
+
     try {
       const synthControl = new abcjs.synth.SynthController();
       synthControl.load(`#${audioId}`, cursorControl, {
@@ -93,14 +114,17 @@ export default function AbcSheet({ abc, showAudio = false, responsive = true, sc
         displayProgress: true,
         displayWarp: true,
       });
-      synthControl.setTune(visualObjs[0], false, { chordsOff: false })
+      synthControl.setTune(synthVisualObjs[0], false, {
+        chordsOff: false,
+        midiTranspose: shift,
+      })
         .then(() => { if (!cancelled) setAudioReady(true); })
         .catch(() => { if (!cancelled) { setAudioReady(false); setAudioSupported(false); } });
       return () => { cancelled = true; try { synthControl.pause(); } catch { /* noop */ } };
     } catch {
       setAudioSupported(false);
     }
-  }, [abc, showAudio, responsive, scale, audioId, cursorControl, shift]);
+  }, [abc, showAudio, responsive, scale, audioId, cursorControl, shift, ignoreRepeats]);
 
   function setShift(value: number) {
     const next = Math.max(-12, Math.min(12, value));
@@ -121,6 +145,19 @@ export default function AbcSheet({ abc, showAudio = false, responsive = true, sc
         <button onClick={() => setShift(shift + 1)} className="rounded-md p-1.5 text-wood-600 hover:bg-amber-100 dark:text-parchment-100 dark:hover:bg-wood-700" aria-label="Transpose up one semitone"><ChevronUp className="h-4 w-4" /></button>
         <button onClick={() => setShift(0)} className="ml-1 rounded-md px-2 py-1 text-xs text-amber-800 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-wood-700">Reset</button>
       </div>
+      <button
+        onClick={() => setIgnoreRepeats((v) => !v)}
+        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
+          ignoreRepeats
+            ? 'bg-amber-700 text-parchment-50 shadow-sm'
+            : 'border border-wood-200 text-wood-600 hover:bg-amber-100 dark:border-wood-700 dark:text-parchment-200 dark:hover:bg-wood-700'
+        }`}
+        aria-label="Toggle repeat bars"
+        title={ignoreRepeats ? 'Repeats ignored — playing through once' : 'Repeats active — playing all repeat sections'}
+      >
+        <Repeat className="h-3.5 w-3.5" />
+        {ignoreRepeats ? 'No repeats' : 'Repeats'}
+      </button>
     </div>}
     <div id={paperId} ref={paperRef} className="abc-sheet" />
     {showAudio && <div className="mt-4">

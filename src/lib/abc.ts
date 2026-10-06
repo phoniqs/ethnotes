@@ -6,9 +6,53 @@ function matchHeader(abc: string, field: string): string | null {
   return match ? match[1].trim() : null;
 }
 
+const TYPE_ALIASES: Record<string, TuneType> = {
+  // Waltz / Valse / Vals
+  waltz: 'Waltz', valse: 'Waltz', vals: 'Waltz',
+  // March / Marche / Marsch
+  march: 'March', marche: 'March', marsch: 'March',
+  // Schottis / Scottische variants
+  schottis: 'Schottis', scottische: 'Schottis', schottische: 'Schottis', schottishe: 'Schottis',
+  // Polska / Pols
+  polska: 'Polska', pols: 'Finnskogpols',
+  // Sønderhoning variants
+  sønderhoning: 'Sønderhoning', sønderhonning: 'Sønderhoning',
+  // Reinlendar variants
+  reinlendar: 'Reinlendar', reinlander: 'Reinlendar',
+  // Skänklåt / Skänlåt
+  skänklåt: 'Skänklåt', skänlåt: 'Skänklåt',
+  // Bourrée variants
+  'bourrée 3 temps': 'Bourrée 3 temps', 'bourrée 3 tps': 'Bourrée 3 temps',
+  'bourrée 2 temps': 'Bourrée 2 temps', 'bouree 2 tps': 'Bourrée 2 temps',
+  'bourrée': 'Bourrée', 'bouree': 'Bourrée',
+  // Gavotte
+  gavotte: 'Gavotte', 'gavotte des montagnes': 'Gavotte',
+  // Mazurka
+  'mazurka': 'Mazurka', 'mazurka-valse': 'Mazurka-valse',
+  // Aksak variants
+  aksak: 'Aksak', askak: 'Aksak',
+  // Three-two
+  'three-two': 'Three-two', 'three two': 'Three-two', '32': 'Three-two',
+  // Compound meters
+  '7/8': '7/8', '5/4': '5/4',
+  // Strathspey
+  strathspey: 'Strathspey',
+  // Barndance
+  barndance: 'Barndance', 'barn dance': 'Barndance',
+  // Slängpolska
+  slängpolska: 'Slängpolska', slangpolska: 'Slängpolska',
+};
+
 function normalizeType(raw: string | null): TuneType | null {
   if (!raw) return null;
-  const lower = raw.toLowerCase();
+  const lower = raw.toLowerCase().trim();
+
+  if (TYPE_ALIASES[lower]) return TYPE_ALIASES[lower];
+
+  for (const [alias, type] of Object.entries(TYPE_ALIASES)) {
+    if (lower.includes(alias)) return type;
+  }
+
   return TUNE_TYPES.find((type) => lower.includes(type.toLowerCase())) ?? null;
 }
 

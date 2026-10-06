@@ -261,6 +261,10 @@ export function extractGroupFromAbc(abc: string): string | null {
   return matchHeader(abc, 'G');
 }
 
+export function extractOriginFromAbc(abc: string): string | null {
+  return matchHeader(abc, 'O');
+}
+
 export function injectComposerHeader(abc: string, composer: string): string {
   const trimmed = composer.trim();
   if (!trimmed) return abc;

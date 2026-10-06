@@ -1,6 +1,7 @@
 import { Layers } from 'lucide-react';
 import FlagStripe from '@/components/FlagStripe';
-import { getFlag } from '@/lib/flags';
+import { resolveFlag } from '@/lib/flags';
+import { extractOriginFromAbc } from '@/lib/abc';
 import { parseAbcMetadata } from '@/lib/abc';
 import type { Tune } from '@/types';
 
@@ -40,7 +41,8 @@ function extractFirstTwoBars(abc: string): string {
 }
 
 export default function TuneCard({ tune, versionCount, onOpen }: TuneCardProps) {
-  const flag = getFlag(tune.group) ?? getFlag(tune.region);
+  const origin = extractOriginFromAbc(tune.abc);
+  const flag = resolveFlag(origin, tune.group, tune.region);
   const hasFlag = flag.type !== 'none';
   const type = parseAbcMetadata(tune.abc).type ?? tune.type;
   const previewAbc = extractFirstTwoBars(tune.abc);
@@ -52,7 +54,7 @@ export default function TuneCard({ tune, versionCount, onOpen }: TuneCardProps) 
     >
       {hasFlag && (
         <div className="absolute inset-0 opacity-[0.13] transition-opacity duration-200 group-hover:opacity-[0.08] dark:opacity-[0.10] dark:group-hover:opacity-[0.06]">
-          <FlagStripe region={tune.region} group={tune.group} className="h-full w-full rounded-none" />
+          <FlagStripe origin={origin} region={tune.region} group={tune.group} className="h-full w-full rounded-none" />
         </div>
       )}
       <div className="relative flex flex-col p-2.5">

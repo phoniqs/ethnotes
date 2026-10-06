@@ -1,13 +1,14 @@
-import { getFlag, type FlagDef } from '@/lib/flags';
+import { resolveFlag, type FlagDef } from '@/lib/flags';
 
 interface FlagStripeProps {
+  origin?: string | null;
   region?: string | null;
   group?: string | null;
   className?: string;
 }
 
-export default function FlagStripe({ region, group, className = '' }: FlagStripeProps) {
-  const flag = getFlag(group) ?? getFlag(region);
+export default function FlagStripe({ origin, region, group, className = '' }: FlagStripeProps) {
+  const flag = resolveFlag(origin, group, region);
   if (!flag || flag.type === 'none') return null;
 
   return (
@@ -52,6 +53,10 @@ function FlagSvg({ flag }: { flag: FlagDef }) {
       return <Saltire flag={flag} />;
     case 'split-vertical':
       return <SplitVertical flag={flag} />;
+    case 'union-jack':
+      return <UnionJack flag={flag} />;
+    case 'eu':
+      return <EuFlag flag={flag} />;
     case 'solid':
       return (
         <svg viewBox="0 0 30 20" className="block h-full w-full" preserveAspectRatio="none">
@@ -146,4 +151,43 @@ function SplitVertical({ flag }: { flag: FlagDef }) {
       <rect x={25} width={5} height={20} fill={right[2]} />
     </svg>
   );
+}
+
+function UnionJack({ flag }: { flag: FlagDef }) {
+  const [blue, white, red] = flag.colors;
+  return (
+    <svg viewBox="0 0 30 20" className="block h-full w-full" preserveAspectRatio="none">
+      <rect width={30} height={20} fill={blue} />
+      <polygon points="0,0 30,20 30,16 4,0" fill={white} />
+      <polygon points="0,20 30,0 30,4 4,20" fill={white} />
+      <polygon points="0,0 30,20 30,17.5 2.5,0" fill={red} />
+      <polygon points="0,20 30,0 30,2.5 2.5,20" fill={red} />
+      <rect x={12} width={6} height={20} fill={white} />
+      <rect y={7} width={30} height={6} fill={white} />
+      <rect x={13} width={4} height={20} fill={red} />
+      <rect y={8} width={30} height={4} fill={red} />
+    </svg>
+  );
+}
+
+function EuFlag({ flag }: { flag: FlagDef }) {
+  const [bg, star] = flag.colors;
+  return (
+    <svg viewBox="0 0 30 20" className="block h-full w-full" preserveAspectRatio="none">
+      <rect width={30} height={20} fill={bg} />
+      <g fill={star}>
+        <Star cx={15} cy={10} r={2.5} />
+      </g>
+    </svg>
+  );
+}
+
+function Star({ cx, cy, r }: { cx: number; cy: number; r: number }) {
+  const points: string[] = [];
+  for (let i = 0; i < 12; i++) {
+    const angle = (Math.PI / 6) * i - Math.PI / 2;
+    const radius = i % 2 === 0 ? r : r * 0.4;
+    points.push(`${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`);
+  }
+  return <polygon points={points.join(' ')} />;
 }

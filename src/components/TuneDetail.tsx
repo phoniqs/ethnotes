@@ -3,7 +3,8 @@ import { ArrowLeft, Eye, EyeOff, FolderTree, Layers, MapPin, Music2, Pencil, Ref
 import AbcSheet from '@/components/AbcSheet';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import FlagStripe from '@/components/FlagStripe';
-import { getFlag } from '@/lib/flags';
+import { resolveFlag } from '@/lib/flags';
+import { extractOriginFromAbc } from '@/lib/abc';
 import type { Tune, TuneSetting } from '@/types';
 
 interface TuneDetailProps {
@@ -95,9 +96,11 @@ export default function TuneDetail({ tune, siblingTunes, settings, onBack, onEdi
 
   const current = tabs[activeVersion] ?? tabs[0];
   const hasMultiple = tabs.length > 1;
-  const flag = getFlag(current.tune.group) ?? getFlag(current.tune.region);
+  const currentOrigin = extractOriginFromAbc(current.abc);
+  const flag = resolveFlag(currentOrigin, current.tune.group, current.tune.region);
   const flagColor = flag.type !== 'none' ? flag.colors[0] : '#b45309';
   const activeTune = current.tune;
+  const activeOrigin = extractOriginFromAbc(current.abc);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
@@ -123,7 +126,7 @@ export default function TuneDetail({ tune, siblingTunes, settings, onBack, onEdi
       </div>
 
       <header className="mb-5">
-        {flag.type !== 'none' && <FlagStripe region={activeTune.region} group={activeTune.group} className="mb-4 h-4" />}
+        {flag.type !== 'none' && <FlagStripe origin={activeOrigin} region={activeTune.region} group={activeTune.group} className="mb-4 h-4" />}
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">{current.label}</span>
           <span className="inline-flex items-center gap-1 text-sm text-wood-500 dark:text-parchment-200/70"><Music2 className="h-4 w-4" />{current.key || activeTune.key}</span>

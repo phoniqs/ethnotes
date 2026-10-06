@@ -3,8 +3,8 @@ import { ArrowLeft, Check, FolderTree, Save, Sparkles, Tag, Trash2, X } from 'lu
 import AbcSheet from '@/components/AbcSheet';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import FlagStripe from '@/components/FlagStripe';
-import { getFlag } from '@/lib/flags';
-import { parseAbcMetadata } from '@/lib/abc';
+import { resolveFlag } from '@/lib/flags';
+import { extractOriginFromAbc, parseAbcMetadata } from '@/lib/abc';
 import { TUNE_TYPES, type Tune, type TuneDraft, type TuneType } from '@/types';
 
 interface TuneEditorProps {
@@ -85,6 +85,9 @@ export default function TuneEditor({ tune, onSave, onCancel, onDelete }: TuneEdi
   const fieldClass =
     'w-full rounded-lg border border-wood-200 bg-parchment-50 px-3 py-2 text-sm text-wood-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 placeholder:text-wood-400 dark:border-wood-700 dark:bg-wood-900 dark:text-parchment-100 dark:placeholder:text-parchment-200/40';
   const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-wood-500 dark:text-parchment-200/70';
+
+  const previewOrigin = extractOriginFromAbc(debouncedAbc);
+  const previewFlag = resolveFlag(previewOrigin, group || null, region || null);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -205,12 +208,12 @@ export default function TuneEditor({ tune, onSave, onCancel, onDelete }: TuneEdi
         </div>
 
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="overflow-hidden rounded-2xl border border-wood-200 bg-parchment-50 p-5 shadow-sheet dark:border-wood-700 dark:bg-wood-900" style={(getFlag(group) ?? getFlag(region)).type !== 'none' ? { borderLeftWidth: '4px', borderLeftColor: (getFlag(group) ?? getFlag(region)).colors[0] } : undefined}>
+          <div className="overflow-hidden rounded-2xl border border-wood-200 bg-parchment-50 p-5 shadow-sheet dark:border-wood-700 dark:bg-wood-900" style={previewFlag.type !== 'none' ? { borderLeftWidth: '4px', borderLeftColor: previewFlag.colors[0] } : undefined}>
             <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-wood-500 dark:text-parchment-200/70">
               <Check className="h-3.5 w-3.5 text-amber-600" />
               Live preview
             </div>
-            {(getFlag(group) ?? getFlag(region)).type !== 'none' && <FlagStripe region={region} group={group} className="mb-3 h-4" />}
+            {previewFlag.type !== 'none' && <FlagStripe origin={previewOrigin} region={region} group={group} className="mb-3 h-4" />}
             <ErrorBoundary>
               <AbcSheet abc={debouncedAbc} showAudio />
             </ErrorBoundary>

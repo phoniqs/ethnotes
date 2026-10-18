@@ -309,6 +309,10 @@ export function extractOriginFromAbc(abc: string): string | null {
   return matchHeader(abc, 'O');
 }
 
+export function extractComposerFromAbc(abc: string): string | null {
+  return matchHeader(abc, 'C');
+}
+
 export function injectComposerHeader(abc: string, composer: string): string {
   const trimmed = composer.trim();
   if (!trimmed) return abc;

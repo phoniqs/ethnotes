@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AlertTriangle, Music4, Plus, Search, Trash2 } from 'lucide-react';
 import TuneCard from '@/components/TuneCard';
+import { extractComposerFromAbc } from '@/lib/abc';
 import type { Tune, TuneType } from '@/types';
 
 interface LibraryProps {
@@ -140,7 +141,8 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
         continue;
       }
       const matchesQuery = group.some((t) =>
-        t.title.toLowerCase().includes(q),
+        t.title.toLowerCase().includes(q) ||
+        (extractComposerFromAbc(t.abc) ?? '').toLowerCase().includes(q),
       );
       if (matchesQuery) result.push({ representative: group[0], all: group });
     }
@@ -167,7 +169,7 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by title…"
+            placeholder="Search by title or composer…"
             className="w-full rounded-lg border border-wood-200 bg-parchment-50 py-2.5 pl-10 pr-3 text-sm text-wood-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 placeholder:text-wood-400 dark:border-wood-700 dark:bg-wood-900 dark:text-parchment-100 dark:placeholder:text-parchment-200/40"
           />
         </div>

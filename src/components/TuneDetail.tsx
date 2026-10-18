@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Eye, EyeOff, FolderTree, Layers, MapPin, Music2, Pencil, RefreshCw, StickyNote, Tag, Trash2 } from 'lucide-react';
 import AbcSheet from '@/components/AbcSheet';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ExternalLinks from '@/components/ExternalLinks';
 import FlagStripe from '@/components/FlagStripe';
 import { resolveFlag } from '@/lib/flags';
 import { extractOriginFromAbc } from '@/lib/abc';
@@ -196,6 +197,8 @@ export default function TuneDetail({ tune, siblingTunes, settings, onBack, onEdi
           <p className="whitespace-pre-wrap leading-relaxed text-wood-700 dark:text-parchment-100/90">{activeTune.notes}</p>
         </div>
       )}
+
+      <ExternalLinks tune={activeTune} currentAbc={current.abc} />
     </div>
   );
 }

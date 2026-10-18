@@ -59,6 +59,14 @@ export const EXTERNAL_SITES: ExternalSite[] = [
     kind: 'shazam',
   },
   {
+    id: 'tradify',
+    name: 'Tradify',
+    description: 'Identify by ear — any repertoire (incl. Quebecois)',
+    url: 'https://ludovical.github.io/Tradify/',
+    categories: ['irish', 'balfolk', 'nordic', 'any'],
+    kind: 'shazam',
+  },
+  {
     id: 'swedishfolkfriend',
     name: 'SwedishFolkFriend',
     description: 'Identify by ear — Swedish/Nordic',

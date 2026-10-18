@@ -11,13 +11,80 @@ interface LibraryProps {
 }
 
 const ALL = 'All';
+const UNKNOWN = 'Unknown';
+
+const KEY_OPTIONS: string[] = (() => {
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  const out: string[] = [];
+  for (const l of letters) {
+    out.push(l);
+    out.push(`${l}#`);
+    out.push(`${l}b`);
+  }
+  return out;
+})();
+
+const MODE_OPTIONS = [
+  'Major', 'Minor', 'Dorian', 'Mixolydian', 'Lydian', 'Phrygian', 'Aeolian', 'Ionian',
+] as const;
+
+type ModeOption = (typeof MODE_OPTIONS)[number];
+
+interface ParsedKey {
+  letter: string | null;
+  accidental: string;
+  mode: ModeOption | null;
+}
+
+function parseKey(raw: string | null | undefined): ParsedKey {
+  const empty: ParsedKey = { letter: null, accidental: '', mode: null };
+  if (!raw) return empty;
+  const trimmed = raw.trim();
+  if (!trimmed) return empty;
+
+  const match = trimmed.match(/^([A-G])(#|b)?(.*)$/i);
+  if (!match) return empty;
+
+  const letter = match[1].toUpperCase();
+  const accidental = match[2] ?? '';
+  const rest = (match[3] ?? '').trim().toLowerCase();
+
+  let mode: ModeOption | null = null;
+  if (!rest) {
+    mode = 'Major';
+  } else if (rest === 'maj' || rest === 'major') {
+    mode = 'Major';
+  } else if (rest === 'm' || rest === 'min' || rest === 'minor') {
+    mode = 'Minor';
+  } else if (rest === 'dor' || rest === 'dorian') {
+    mode = 'Dorian';
+  } else if (rest === 'mix' || rest === 'mixolydian') {
+    mode = 'Mixolydian';
+  } else if (rest === 'lyd' || rest === 'lydian') {
+    mode = 'Lydian';
+  } else if (rest === 'phr' || rest === 'phrygian') {
+    mode = 'Phrygian';
+  } else if (rest === 'aeol' || rest === 'aeolian') {
+    mode = 'Aeolian';
+  } else if (rest === 'ion' || rest === 'ionian') {
+    mode = 'Ionian';
+  }
+
+  return { letter, accidental, mode };
+}
+
+function keyLabel(parsed: ParsedKey): string {
+  if (!parsed.letter) return UNKNOWN;
+  return `${parsed.letter}${parsed.accidental}`;
+}
 
 export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: LibraryProps) {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<TuneType | typeof ALL>(ALL);
-  const [regionFilter, setRegionFilter] = useState<string>(ALL);
   const [tagFilter, setTagFilter] = useState<string>(ALL);
   const [groupFilter, setGroupFilter] = useState<string>(ALL);
+  const [keyFilter, setKeyFilter] = useState<string>(ALL);
+  const [modeFilter, setModeFilter] = useState<string>(ALL);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Tune[]>();
@@ -36,12 +103,6 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
     return [ALL, ...Array.from(set).sort()];
   }, [tunes]);
 
-  const regions = useMemo(() => {
-    const set = new Set<string>();
-    tunes.forEach((t) => t.region && set.add(t.region));
-    return [ALL, ...Array.from(set).sort()];
-  }, [tunes]);
-
   const tags = useMemo(() => {
     const set = new Set<string>();
     tunes.forEach((t) => (t.tags ?? []).forEach((tag) => set.add(tag)));
@@ -57,12 +118,20 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const result: { representative: Tune; all: Tune[] }[] = [];
-    for (const [titleKey, group] of grouped) {
+    for (const [, group] of grouped) {
       const matchesFilters = group.some((t) => {
         if (typeFilter !== ALL && t.type !== typeFilter) return false;
-        if (regionFilter !== ALL && t.region !== regionFilter) return false;
         if (tagFilter !== ALL && !(t.tags ?? []).includes(tagFilter)) return false;
         if (groupFilter !== ALL && t.group !== groupFilter) return false;
+        if (keyFilter !== ALL) {
+          const parsed = parseKey(t.key);
+          if (keyLabel(parsed) !== keyFilter) return false;
+        }
+        if (modeFilter !== ALL) {
+          const parsed = parseKey(t.key);
+          const modeName = parsed.mode ?? UNKNOWN;
+          if (modeName !== modeFilter) return false;
+        }
         return true;
       });
       if (!matchesFilters) continue;
@@ -71,18 +140,12 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
         continue;
       }
       const matchesQuery = group.some((t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.region.toLowerCase().includes(q) ||
-        t.key.toLowerCase().includes(q) ||
-        t.notes.toLowerCase().includes(q) ||
-        (t.tags ?? []).some((tag) => tag.toLowerCase().includes(q)) ||
-        (t.group ?? '').toLowerCase().includes(q)
+        t.title.toLowerCase().includes(q),
       );
       if (matchesQuery) result.push({ representative: group[0], all: group });
-      void titleKey;
     }
     return result;
-  }, [grouped, query, typeFilter, regionFilter, tagFilter, groupFilter]);
+  }, [grouped, query, typeFilter, tagFilter, groupFilter, keyFilter, modeFilter]);
 
   const selectClass =
     'rounded-lg border border-wood-200 bg-parchment-50 px-3 py-2 text-sm text-wood-700 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 dark:border-wood-700 dark:bg-wood-900 dark:text-parchment-100';
@@ -104,7 +167,7 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by title, region, key, notes or tags…"
+            placeholder="Search by title…"
             className="w-full rounded-lg border border-wood-200 bg-parchment-50 py-2.5 pl-10 pr-3 text-sm text-wood-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 placeholder:text-wood-400 dark:border-wood-700 dark:bg-wood-900 dark:text-parchment-100 dark:placeholder:text-parchment-200/40"
           />
         </div>
@@ -112,14 +175,25 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as TuneType | typeof ALL)} className={selectClass}>
             {types.map((t) => (
               <option key={t} value={t}>
-                {t === ALL ? 'All types' : t}
+                {t === ALL ? 'Dances' : t}
               </option>
             ))}
           </select>
-          <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)} className={selectClass}>
-            {regions.map((r) => (
-              <option key={r} value={r}>
-                {r === ALL ? 'All regions' : r}
+          <select value={keyFilter} onChange={(e) => setKeyFilter(e.target.value)} className={selectClass}>
+            <option value={ALL}>Keys</option>
+            <option value={UNKNOWN}>{UNKNOWN}</option>
+            {KEY_OPTIONS.map((k) => (
+              <option key={k} value={k}>
+                {k}
+              </option>
+            ))}
+          </select>
+          <select value={modeFilter} onChange={(e) => setModeFilter(e.target.value)} className={selectClass}>
+            <option value={ALL}>Modes</option>
+            <option value={UNKNOWN}>{UNKNOWN}</option>
+            {MODE_OPTIONS.map((m) => (
+              <option key={m} value={m}>
+                {m}
               </option>
             ))}
           </select>
@@ -136,7 +210,7 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: Librar
             <select value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)} className={selectClass}>
               {groups.map((g) => (
                 <option key={g} value={g}>
-                  {g === ALL ? 'All groups' : g}
+                  {g === ALL ? 'Countries' : g}
                 </option>
               ))}
             </select>

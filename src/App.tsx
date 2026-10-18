@@ -11,7 +11,7 @@ import Community from '@/components/Community';
 import Stats from '@/components/Stats';
 import { supabase } from '@/lib/supabase';
 import { loadTunes } from '@/lib/storage';
-import { deleteAllTunes, deleteCloudTune, findTunesByTitle, addSettingToTune, insertTune, insertTuneWithSettings, insertTunes, loadCloudSettings, loadCloudTunes, reparseTune, updateCloudTune, backfillGroupHeaders, backfillXFields, backfillComposers } from '@/lib/cloud';
+import { deleteAllTunes, deleteCloudTune, findTunesByTitle, addSettingToTune, insertTune, insertTuneWithSettings, insertTunes, loadCloudSettings, loadCloudTunes, reparseTune, updateCloudTune } from '@/lib/cloud';
 import type { Tune, TuneDraft, TuneSetting } from '@/types';
 
 type View = { name: 'library' } | { name: 'detail'; id: string } | { name: 'editor'; id: string | null } | { name: 'import' } | { name: 'community' } | { name: 'stats' };
@@ -35,8 +35,6 @@ export default function App() {
   const [view, setView] = useState<View>({ name: 'library' });
   const [pendingDelete, setPendingDelete] = useState<Tune | null>(null);
   const [pendingReset, setPendingReset] = useState(false);
-  const [backfilling, setBackfilling] = useState(false);
-  const [backfillMessage, setBackfillMessage] = useState('');
   const [dark, setDark] = useState(false);
   const [error, setError] = useState('');
 
@@ -171,48 +169,6 @@ export default function App() {
     } catch { setError('That tune could not be deleted. Please try again.'); setPendingDelete(null); }
   }
 
-  async function handleBackfillGroups() {
-    setBackfilling(true);
-    try {
-      const result = await backfillGroupHeaders();
-      if (session) await refreshTunes(session.user.id);
-      setError('');
-      setBackfillMessage(`Updated ${result.updated} tune${result.updated === 1 ? '' : 's'}, skipped ${result.skipped} that already had the G: field.`);
-    } catch {
-      setError('Could not update tune groups. Please try again.');
-    } finally {
-      setBackfilling(false);
-    }
-  }
-
-  async function handleBackfillXFields() {
-    setBackfilling(true);
-    try {
-      const result = await backfillXFields();
-      if (session) await refreshTunes(session.user.id);
-      setError('');
-      setBackfillMessage(`Updated ${result.updated} tune${result.updated === 1 ? '' : 's'}, skipped ${result.skipped} that already had the correct X: field.`);
-    } catch {
-      setError('Could not update X: fields. Please try again.');
-    } finally {
-      setBackfilling(false);
-    }
-  }
-
-  async function handleBackfillComposers() {
-    setBackfilling(true);
-    try {
-      const result = await backfillComposers();
-      if (session) await refreshTunes(session.user.id);
-      setError('');
-      setBackfillMessage(`Updated ${result.updated} tune${result.updated === 1 ? '' : 's'}, skipped ${result.skipped} that already had a C: field or no Session URL.`);
-    } catch {
-      setError('Could not update composer fields. Please try again.');
-    } finally {
-      setBackfilling(false);
-    }
-  }
-
   if (authLoading) return <div className="flex min-h-screen items-center justify-center bg-parchment-100 text-wood-500 dark:bg-wood-950 dark:text-parchment-200">Loading Ethnotes…</div>;
   if (!session) return <AuthScreen />;
 
@@ -227,7 +183,7 @@ export default function App() {
 
   return <div className="min-h-full"><Header dark={dark} onToggleDark={() => setDark((value) => !value)} onNewTune={() => setView({ name: 'editor', id: null })} onBulkImport={() => setView({ name: 'import' })} onCommunity={() => setView({ name: 'community' })} onStats={() => setView({ name: 'stats' })} onHome={() => setView({ name: 'library' })} onSignOut={() => void supabase.auth.signOut()} showActions={view.name === 'library' || view.name === 'detail' || view.name === 'stats'} />
     {error && <div className="mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8"><div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-200">{error}</div></div>}
-    <main>{view.name === 'library' && <Library tunes={tunes} onOpen={(tune) => setView({ name: 'detail', id: tune.id })} onCreate={() => setView({ name: 'editor', id: null })} onDeleteAll={() => setPendingReset(true)} onBackfillGroups={handleBackfillGroups} onBackfillXFields={handleBackfillXFields} onBackfillComposers={handleBackfillComposers} backfilling={backfilling} backfillMessage={backfillMessage} />}{view.name === 'detail' && (selectedTune ? <TuneDetail tune={selectedTune} siblingTunes={siblingTunes} settings={siblingSettings} onBack={() => setView({ name: 'library' })} onEdit={() => setView({ name: 'editor', id: selectedTune.id })} onDelete={() => setPendingDelete(selectedTune)} onReparse={() => handleReparse(selectedTune.id)} /> : <MissingTune onBack={() => setView({ name: 'library' })} />)}{view.name === 'editor' && <TuneEditor tune={editingTune} onSave={handleSave} onCancel={() => setView(editingTune ? { name: 'detail', id: editingTune.id } : { name: 'library' })} onDelete={editingTune ? () => setPendingDelete(editingTune) : undefined} />}{view.name === 'import' && <BulkImport onBack={() => setView({ name: 'library' })} onImport={handleBulkImport} />}{view.name === 'community' && <Community userId={session.user.id} ownTunes={tunes} onBack={() => setView({ name: 'library' })} />}{view.name === 'stats' && <Stats tunes={tunes} onBack={() => setView({ name: 'library' })} />}</main>
+    <main>{view.name === 'library' && <Library tunes={tunes} onOpen={(tune) => setView({ name: 'detail', id: tune.id })} onCreate={() => setView({ name: 'editor', id: null })} onDeleteAll={() => setPendingReset(true)} />}{view.name === 'detail' && (selectedTune ? <TuneDetail tune={selectedTune} siblingTunes={siblingTunes} settings={siblingSettings} onBack={() => setView({ name: 'library' })} onEdit={() => setView({ name: 'editor', id: selectedTune.id })} onDelete={() => setPendingDelete(selectedTune)} onReparse={() => handleReparse(selectedTune.id)} /> : <MissingTune onBack={() => setView({ name: 'library' })} />)}{view.name === 'editor' && <TuneEditor tune={editingTune} onSave={handleSave} onCancel={() => setView(editingTune ? { name: 'detail', id: editingTune.id } : { name: 'library' })} onDelete={editingTune ? () => setPendingDelete(editingTune) : undefined} />}{view.name === 'import' && <BulkImport onBack={() => setView({ name: 'library' })} onImport={handleBulkImport} />}{view.name === 'community' && <Community userId={session.user.id} ownTunes={tunes} onBack={() => setView({ name: 'library' })} />}{view.name === 'stats' && <Stats tunes={tunes} onBack={() => setView({ name: 'library' })} />}</main>
     <ConfirmDialog open={!!pendingDelete} title="Delete this tune?" message={`"${pendingDelete?.title ?? ''}" will be permanently removed from your repertoire.`} onConfirm={() => void confirmDelete()} onCancel={() => setPendingDelete(null)} />
     <ConfirmDialog open={pendingReset} title="Delete all tunes?" message="Are you sure you want to permanently delete all tunes from your repertoire? This action cannot be undone." confirmLabel="Yes, delete everything" onConfirm={() => void confirmReset()} onCancel={() => setPendingReset(false)} />
   </div>;

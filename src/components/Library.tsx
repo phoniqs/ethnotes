@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, Hash, Music4, Plus, RefreshCw, Search, Trash2, UserPlus } from 'lucide-react';
+import { AlertTriangle, Music4, Plus, Search, Trash2 } from 'lucide-react';
 import TuneCard from '@/components/TuneCard';
 import type { Tune, TuneType } from '@/types';
 
@@ -8,16 +8,11 @@ interface LibraryProps {
   onOpen: (tune: Tune) => void;
   onCreate: () => void;
   onDeleteAll: () => void;
-  onBackfillGroups: () => void;
-  onBackfillXFields: () => void;
-  onBackfillComposers: () => void;
-  backfilling: boolean;
-  backfillMessage: string;
 }
 
 const ALL = 'All';
 
-export default function Library({ tunes, onOpen, onCreate, onDeleteAll, onBackfillGroups, onBackfillXFields, onBackfillComposers, backfilling, backfillMessage }: LibraryProps) {
+export default function Library({ tunes, onOpen, onCreate, onDeleteAll }: LibraryProps) {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<TuneType | typeof ALL>(ALL);
   const [regionFilter, setRegionFilter] = useState<string>(ALL);
@@ -184,69 +179,6 @@ export default function Library({ tunes, onOpen, onCreate, onDeleteAll, onBackfi
 
       {tunes.length > 0 && (
         <div className="mt-12 space-y-4">
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                <RefreshCw className={`h-5 w-5 ${backfilling ? 'animate-spin' : ''}`} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-display text-base font-semibold text-amber-800 dark:text-amber-200">Update G: fields</h3>
-                <p className="mt-1 text-sm text-amber-700/80 dark:text-amber-300/70">Add a G: header into the ABC notation of every tune that has a group but is missing it. Tunes that already have a G: field are left untouched.</p>
-                <button
-                  onClick={onBackfillGroups}
-                  disabled={backfilling}
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
-                >
-                  <RefreshCw className={`h-4 w-4 ${backfilling ? 'animate-spin' : ''}`} />
-                  {backfilling ? 'Updating…' : 'Update all G: fields'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                <UserPlus className={`h-5 w-5 ${backfilling ? 'animate-spin' : ''}`} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-display text-base font-semibold text-amber-800 dark:text-amber-200">Update C: fields from The Session</h3>
-                <p className="mt-1 text-sm text-amber-700/80 dark:text-amber-300/70">For every tune that has a link to The Session (thesession.org) in its S: field but is missing a C: field, look up the composer on The Session and add their name to the C: field. Tunes that already have a C: field are left untouched.</p>
-                <button
-                  onClick={onBackfillComposers}
-                  disabled={backfilling}
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
-                >
-                  <UserPlus className={`h-4 w-4 ${backfilling ? 'animate-spin' : ''}`} />
-                  {backfilling ? 'Updating…' : 'Update all C: fields'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                <Hash className={`h-5 w-5 ${backfilling ? 'animate-spin' : ''}`} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-display text-base font-semibold text-amber-800 dark:text-amber-200">Update X: fields</h3>
-                <p className="mt-1 text-sm text-amber-700/80 dark:text-amber-300/70">Renumber the X: header of every tune so that tunes sharing the same title get sequential X: values (X:1, X:2, X:3…). Tunes that already have the correct X: number are left untouched.</p>
-                <button
-                  onClick={onBackfillXFields}
-                  disabled={backfilling}
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
-                >
-                  <Hash className={`h-4 w-4 ${backfilling ? 'animate-spin' : ''}`} />
-                  {backfilling ? 'Updating…' : 'Update all X: fields'}
-                </button>
-                {backfillMessage && (
-                  <p className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-200">{backfillMessage}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
           <div className="rounded-2xl border border-red-200 bg-red-50/50 p-5 dark:border-red-900/50 dark:bg-red-950/20">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-300">

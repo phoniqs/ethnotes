@@ -57,6 +57,8 @@ function FlagSvg({ flag }: { flag: FlagDef }) {
       return <UnionJack flag={flag} />;
     case 'eu':
       return <EuFlag flag={flag} />;
+    case 'brittany':
+      return <BrittanyFlag flag={flag} />;
     case 'solid':
       return (
         <svg viewBox="0 0 30 20" className="block h-full w-full" preserveAspectRatio="none">
@@ -167,6 +169,47 @@ function UnionJack({ flag }: { flag: FlagDef }) {
       <rect x={13} width={4} height={20} fill={red} />
       <rect y={8} width={30} height={4} fill={red} />
     </svg>
+  );
+}
+
+function BrittanyFlag({ flag }: { flag: FlagDef }) {
+  const [black, white] = flag.colors;
+  // Gwenn-ha-du: 9 horizontal stripes (5 black, 4 white) + ermine canton
+  const stripes = Array.from({ length: 9 }, (_, i) => ({
+    y: (i * 20) / 9,
+    fill: i % 2 === 0 ? black : white,
+  }));
+  const cantonW = 12;
+  const cantonH = 10;
+  const spots: Array<[number, number]> = [
+    [3, 2.5], [9, 2.5],
+    [6, 5],
+    [3, 7.5], [9, 7.5],
+  ];
+  return (
+    <svg viewBox="0 0 30 20" className="block h-full w-full" preserveAspectRatio="none">
+      {stripes.map((s, i) => (
+        <rect key={i} y={s.y} width={30} height={20 / 9 + 0.1} fill={s.fill} />
+      ))}
+      <rect x={0} y={0} width={cantonW} height={cantonH} fill={white} />
+      {spots.map(([cx, cy], i) => (
+        <ErmineSpot key={i} cx={cx} cy={cy} fill={black} />
+      ))}
+    </svg>
+  );
+}
+
+function ErmineSpot({ cx, cy, fill }: { cx: number; cy: number; fill: string }) {
+  return (
+    <g transform={`translate(${cx} ${cy}) scale(0.9)`}>
+      <path
+        d="M 0,-1.6 C 0.5,-1.1 1.1,-0.9 1.1,-0.2 C 1.1,0.4 0.5,0.7 0,1.6 C -0.5,0.7 -1.1,0.4 -1.1,-0.2 C -1.1,-0.9 -0.5,-1.1 0,-1.6 Z M 0,0.9 L 0,1.9 M -0.6,1.2 L 0,1.9 M 0.6,1.2 L 0,1.9"
+        fill={fill}
+        stroke={fill}
+        strokeWidth={0.28}
+        strokeLinecap="round"
+      />
+    </g>
   );
 }
 

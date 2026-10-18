@@ -115,12 +115,6 @@ export async function updateCloudTune(id: string, draft: TuneDraft): Promise<Tun
   return fromRow(data);
 }
 
-export async function updateTuneTags(id: string, tags: string[]): Promise<Tune> {
-  const { data, error } = await supabase.from('tunes').update({ tags }).eq('id', id).select('*').maybeSingle();
-  if (error || !data) throw error ?? new Error('Tune not found');
-  return fromRow(data);
-}
-
 export async function updateTuneGroup(id: string, group: string | null): Promise<Tune> {
   const { data, error } = await supabase.from('tunes').update({ tune_group: group }).eq('id', id).select('*').maybeSingle();
   if (error || !data) throw error ?? new Error('Tune not found');

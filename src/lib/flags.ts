@@ -8,6 +8,7 @@ export type FlagType =
   | 'bicolor-horizontal'
   | 'union-jack'
   | 'eu'
+  | 'brittany'
   | 'none';
 
 export interface FlagDef {
@@ -30,10 +31,10 @@ const FLAGS: Record<string, FlagDef> = {
   scandinave: { type: 'nordic-cross', colors: ['#d62828', '#ffffff', '#0033a0', '#fcd116', '#009246', '#012169', '#003897', '#005293'], label: 'Scandinavia' },
   nordic: { type: 'nordic-cross', colors: ['#d62828', '#ffffff', '#0033a0', '#fcd116', '#009246', '#012169', '#003897', '#005293'], label: 'Scandinavia' },
 
-  brittany: { type: 'bicolor-horizontal', colors: ['#000000', '#ffffff'], label: 'Brittany' },
-  bretagne: { type: 'bicolor-horizontal', colors: ['#000000', '#ffffff'], label: 'Brittany' },
-  breton: { type: 'bicolor-horizontal', colors: ['#000000', '#ffffff'], label: 'Brittany' },
-  bretton: { type: 'bicolor-horizontal', colors: ['#000000', '#ffffff'], label: 'Brittany' },
+  brittany: { type: 'brittany', colors: ['#000000', '#ffffff'], label: 'Brittany' },
+  bretagne: { type: 'brittany', colors: ['#000000', '#ffffff'], label: 'Brittany' },
+  breton: { type: 'brittany', colors: ['#000000', '#ffffff'], label: 'Brittany' },
+  bretton: { type: 'brittany', colors: ['#000000', '#ffffff'], label: 'Brittany' },
 
   // Britannia → Union Jack (NOT Brittany!)
   britannia: { type: 'union-jack', colors: ['#012169', '#ffffff', '#c8102e'], label: 'Britannia' },
@@ -156,7 +157,7 @@ const FLAGS: Record<string, FlagDef> = {
   vendée: { type: 'tricolor-vertical', colors: ['#0055a4', '#ffffff', '#ef4135'], label: 'France' },
   grenoble: { type: 'tricolor-vertical', colors: ['#0055a4', '#ffffff', '#ef4135'], label: 'France' },
   'île-de-france': { type: 'tricolor-vertical', colors: ['#0055a4', '#ffffff', '#ef4135'], label: 'France' },
-  'haute-bretagne': { type: 'bicolor-horizontal', colors: ['#000000', '#ffffff'], label: 'Brittany' },
+  'haute-bretagne': { type: 'brittany', colors: ['#000000', '#ffffff'], label: 'Brittany' },
   'le mans': { type: 'tricolor-vertical', colors: ['#0055a4', '#ffffff', '#ef4135'], label: 'France' },
   enghien: { type: 'tricolor-vertical', colors: ['#0055a4', '#ffffff', '#ef4135'], label: 'France' },
   sallertaine: { type: 'tricolor-vertical', colors: ['#0055a4', '#ffffff', '#ef4135'], label: 'France' },

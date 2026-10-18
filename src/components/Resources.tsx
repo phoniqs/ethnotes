@@ -41,7 +41,7 @@ export default function Resources({ onBack }: ResourcesProps) {
         Back to library
       </button>
       <div className="mb-7">
-        <h1 className="font-display text-3xl font-semibold text-wood-800 dark:text-parchment-100">Ressources</h1>
+        <h1 className="font-display text-3xl font-semibold text-wood-800 dark:text-parchment-100">Resources</h1>
         <p className="mt-2 text-wood-500 dark:text-parchment-200/70">Tools and references for finding and learning new tunes. Everything opens in a new tab.</p>
       </div>
 
